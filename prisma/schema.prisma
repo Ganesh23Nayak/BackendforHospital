@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMINISTRATOR
+}
+
+enum Status {
+  SCHEDULED
+  CONFIRMED
+  CANCELED
+  COMPLETED
+  // Add other status values as needed
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  name          String
+  email         String          @unique
+  password      String
+  age           Int?
+  sex           String?
+  phone_number  String?         @unique
+  role          Role
+  patient       Patient[]
+  doctor        Doctor[]
+  administrator Administrator[]
+}
+
+model Patient {
+  id                Int           @id @default(autoincrement())
+  user              User          @relation(fields: [patientId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  patientId         Int           @unique
+  health_conditions String?
+  appointments      Appointment[]
+}
+
+model Doctor {
+  id             Int           @id @default(autoincrement())
+  user           User          @relation(fields: [doctorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  doctorId       Int           @unique
+  specialization String?
+  appointments   Appointment[]
+}
+
+model Administrator {
+  id              Int     @id @default(autoincrement())
+  user            User    @relation(fields: [administratorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  administratorId Int     @unique
+  department      String?
+}
+
+model Appointment {
+  id               Int       @id @default(autoincrement())
+  patient          Patient   @relation(fields: [patientId], references: [patientId], onUpdate: Cascade, onDelete: Cascade)
+  patientId        Int
+  doctor           Doctor    @relation(fields: [doctorId], references: [doctorId], onUpdate: Cascade, onDelete: Cascade)
+  doctorId         Int
+  status           Status // Consider using an enum for status
+  appointment_date DateTime?
+  appointment_time DateTime?
+  // other appointment details
+}
+
+// npx prisma generate
+// npx prisma migrate dev --name init --create-only
+// npx prisma migrate deploy
