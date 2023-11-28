@@ -265,7 +265,53 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
+//getdoctors
+// app.post('/getdoctor', async (req, res) => {
+//   try {
+//     const alluser = await prisma.user.findMany(
+//       {
+//         where: {
+//           role:'DOCTOR'
+    
+//         },
+//       }
 
+//     );
+//     console.log(alluser);
+//     res.status(200).json({ alluser });
+//   } catch (error) {
+//     console.error('Error finding user:', error);
+//     res.status(500).json({ error: 'Error finding user' });
+//   }
+  
+// })
+app.post('/getdoctor', async (req, res) => {
+  try {
+    const doctors = await prisma.user.findMany({
+      where: {
+        role: 'DOCTOR',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        sex:true,
+        phone_number:true,
+        doctor: {
+          select: {
+            specialization: true,
+          },
+        },
+      },
+    });
+
+    console.log(doctors);
+    res.status(200).json({ doctors });
+  } catch (error) {
+    console.error('Error finding doctors:', error);
+    res.status(500).json({ error: 'Error finding doctors' });
+  }
+});
 
 
 
