@@ -278,6 +278,7 @@ app.post('/getdoctor', async (req, res) => {
         name: true,
         email: true,
         sex:true,
+        age:true,
         phone_number:true,
         doctor: {
           select: {
