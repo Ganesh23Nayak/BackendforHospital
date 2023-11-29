@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
             name: receivedData.name,
             email: receivedData.email,
             password: receivedData.password,
-            age: receivedData.age,
+            age: parseInt(receivedData.age),
             sex: receivedData.sex,
             phone_number: receivedData.phone_number,
             role: 'DOCTOR',
@@ -67,9 +67,9 @@ app.get('/', (req, res) => {
             name: receivedData.name,
             email: receivedData.email,
             password: receivedData.password,
-            age: receivedData.age,
-            sex: receivedData.sex,
-            phone_number: receivedData.phone_number,
+            // age: receivedData.age,
+            // sex: receivedData.sex,
+            // phone_number: receivedData.phone_number,
             role: 'ADMINISTRATOR',
           },
         });
@@ -175,7 +175,6 @@ app.post('/find', async (req, res) => {
       {
         where: {
           role:'DOCTOR'
-    
         },
       }
 
@@ -188,6 +187,7 @@ app.post('/find', async (req, res) => {
   }
   
 })
+
 
 //find patients all
 app.post('/findPatient', async (req, res) => {
@@ -265,26 +265,8 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-//getdoctors
-// app.post('/getdoctor', async (req, res) => {
-//   try {
-//     const alluser = await prisma.user.findMany(
-//       {
-//         where: {
-//           role:'DOCTOR'
-    
-//         },
-//       }
-
-//     );
-//     console.log(alluser);
-//     res.status(200).json({ alluser });
-//   } catch (error) {
-//     console.error('Error finding user:', error);
-//     res.status(500).json({ error: 'Error finding user' });
-//   }
-  
-// })
+// doctor dash board
+//getdoctors working
 app.post('/getdoctor', async (req, res) => {
   try {
     const doctors = await prisma.user.findMany({
@@ -305,7 +287,7 @@ app.post('/getdoctor', async (req, res) => {
       },
     });
 
-    console.log(doctors);
+    // console.log(doctors);
     res.status(200).json({ doctors });
   } catch (error) {
     console.error('Error finding doctors:', error);
@@ -313,6 +295,33 @@ app.post('/getdoctor', async (req, res) => {
   }
 });
 
+
+//deletdoctor with email
+app.delete('/removeDoctor/:email', async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    // Use Prisma to delete the doctor based on email
+    const deletedDoctor =  await prisma.user.delete({
+      where: {
+        email: email,
+      },
+    });
+
+    res.status(200).json({ success: true, deletedDoctor });
+  } catch (error) {
+    console.error('Error deleting doctor:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+//detete doctor on undo not working
+app.delete('/removeDoctor/:id', async (req, res) => {
+  const { id } = req.params;
+  const removedDoctor = await prisma.doctor.delete({
+    where: { id: parseInt(id) },
+  });
+  res.json(removedDoctor);
+});
 
 
 
