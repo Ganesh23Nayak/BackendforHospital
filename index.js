@@ -265,7 +265,40 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-// doctor dash board
+
+// patient dash for admin
+app.post('/getpatient', async (req, res) => {
+  try {
+    const patients = await prisma.user.findMany({
+      where: {
+        role: 'PATIENT',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        sex:true,
+        age:true,
+        phone_number:true,
+        doctor: {
+          select: {
+            specialization: true,
+          },
+        },
+      },
+    });
+
+    console.log(patients);
+    res.status(200).json({ patients });
+  } catch (error) {
+    console.error('Error finding doctors:', error);
+    res.status(500).json({ error: 'Error finding patients' });
+  }
+});
+
+
+
+// doctor dash board  for admin
 //getdoctors working
 app.post('/getdoctor', async (req, res) => {
   try {
@@ -278,6 +311,7 @@ app.post('/getdoctor', async (req, res) => {
         name: true,
         email: true,
         sex:true,
+        age:true,
         phone_number:true,
         doctor: {
           select: {
@@ -297,7 +331,7 @@ app.post('/getdoctor', async (req, res) => {
 
 
 //deletdoctor with email
-app.delete('/removeDoctor/:email', async (req, res) => {
+app.delete('/removeusr/:email', async (req, res) => {
   const { email } = req.params;
 
   try {
@@ -314,6 +348,8 @@ app.delete('/removeDoctor/:email', async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
+
+
 //detete doctor on undo not working
 app.delete('/removeDoctor/:id', async (req, res) => {
   const { id } = req.params;
