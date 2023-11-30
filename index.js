@@ -12,8 +12,7 @@ app.get('/', (req, res) => {
 })
 
 
-
-// works fine add user
+// works fine add user  
   app.post('/addUser', async (req, res) => {
     try {
       const receivedData = req.body;
@@ -115,6 +114,8 @@ app.get('/', (req, res) => {
     }
   })
 
+
+  //patient dashboard
 //works fine add appointment
   app.post('/addAppointment', async (req, res) => {
     try {
@@ -296,8 +297,6 @@ app.post('/getpatient', async (req, res) => {
   }
 });
 
-
-
 // doctor dash board  for admin
 //getdoctors working
 app.post('/getdoctor', async (req, res) => {
@@ -329,7 +328,6 @@ app.post('/getdoctor', async (req, res) => {
   }
 });
 
-
 //deletdoctor with email
 app.delete('/removeusr/:email', async (req, res) => {
   const { email } = req.params;
@@ -349,7 +347,6 @@ app.delete('/removeusr/:email', async (req, res) => {
   }
 });
 
-
 //detete doctor on undo not working
 app.delete('/removeDoctor/:id', async (req, res) => {
   const { id } = req.params;
@@ -358,6 +355,91 @@ app.delete('/removeDoctor/:id', async (req, res) => {
   });
   res.json(removedDoctor);
 });
+
+
+
+
+// for doct table working fine
+app.post('/getappointments', async (req, res) => {
+  const { doctId } = req.body;
+
+  try {
+    // Use Prisma to fetch appointments for the given doctor ID
+    const appointmentsForDoctor = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctId,
+      },
+      include: {
+        patient: {
+          include: {
+            user: true,
+          },
+        },
+         // Include patient details
+      },
+    });
+
+    res.json({ appointments: appointmentsForDoctor });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+//rejected appointments appointment
+app.post('/cancelappointment', async (req, res) => {
+  const { appointmentId } = req.body;
+
+  try {
+    // Update the appointment status to CANCELLED
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { status: 'CANCELED' },
+    });
+
+    res.json({ success: true, updatedAppointment });
+  } catch (error) {
+    console.error('Error cancelling appointment:', error);
+    res.status(500).json({ success: false, error: 'Error cancelling appointment' });
+  }
+});
+
+//accepted appointments
+app.post('/acceptappointment', async (req, res) => {
+  const { appointmentId } = req.body;
+
+  try {
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { status: 'CONFIRMED' },
+    });
+
+    res.json({ success: true, updatedAppointment });
+  } catch (error) {
+    console.error('Error accepting appointment:', error);
+    res.status(500).json({ success: false, error: 'Error accepting appointment' });
+  }
+});
+
+//done appointments
+app.post('/doneappointment', async (req, res) => {
+  const { appointmentId } = req.body;
+
+  try {
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { status: 'COMPLETED' },
+    });
+
+    res.json({ success: true, updatedAppointment });
+  } catch (error) {
+    console.error('Error accepting appointment:', error);
+    res.status(500).json({ success: false, error: 'Error accepting appointment' });
+  }
+});
+
+
+
 
 
 
