@@ -67,9 +67,8 @@ app.get('/', (req, res) => {
             name: receivedData.name,
             email: receivedData.email,
             password: receivedData.password,
-            // age: receivedData.age,
-            // sex: receivedData.sex,
-            // phone_number: receivedData.phone_number,
+            sex: receivedData.gender,
+            age:parseInt(receivedData.age),
             role: 'ADMINISTRATOR',
           },
         });
@@ -295,6 +294,37 @@ app.post('/getpatient', async (req, res) => {
     res.status(500).json({ error: 'Error finding patients' });
   }
 });
+
+//admin dash for ADMIN
+app.post('/getadmin', async (req, res) => {
+  try {
+    const admins = await prisma.user.findMany({
+      where: {
+        role: 'ADMINISTRATOR',
+      },
+      select: {
+        id: true,
+        name: true,
+        age: true,
+        sex: true,
+        password: true, // Include password only if necessary (not recommended)
+        email: true,
+        administrator: {
+          select: {
+            user:true,
+          },
+        }
+      },
+    });
+
+    console.log(admins);
+    res.status(200).json({ admins });
+  } catch (error) {
+    console.error('Error finding admins:', error.message);
+    res.status(500).json({ error: 'Error finding admins' });
+  }
+});
+
 
 
 
