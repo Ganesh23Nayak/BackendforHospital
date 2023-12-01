@@ -128,7 +128,15 @@ app.get('/', (req, res) => {
           appointment_date: receivedData.appointment_date,
           appointment_time: receivedData.appointment_time
         },
-      })
+      });
+      await prisma.patient.update({
+        where: {
+          id: receivedData.patientId,
+        },
+        data: {
+          health_conditions: receivedData.health_conditions,
+        },
+      });
       res.status(200).json({ message: 'Appointment added successfully', newAppointment });
     } catch (error) {
       console.error('Error adding user and role:', error);
@@ -136,6 +144,74 @@ app.get('/', (req, res) => {
     }
 
   })
+
+  //delet appointment 
+  // app.delete('/deleteAppointment', async (req, res) => {
+  //   try {
+  //     const appointmentId = req.body;
+
+  //     const deletedAppointment = await prisma.appointment.delete({
+  //       where: {
+  //         id: appointmentId,
+  //       },
+  //     });
+  //     res.status(200).json({ deletedAppointment });
+  //   } catch (error) {
+  //     console.error('Error deleting appointment:', error);
+  //     res.status(500).json({ error: 'Error deleting appointment' });
+  //   }
+  // })
+
+  app.delete('/deleteAppointment', async (req, res) => {
+    try {
+      const appointmentId = req.body.appointmentId; // Change this line
+      const deletedAppointment = await prisma.appointment.delete({
+        where: {
+          id: appointmentId,
+        },
+      });
+      res.status(200).json({ deletedAppointment });
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      res.status(500).json({ error: 'Error deleting appointment' });
+    }
+  });
+  
+
+//get appointments works fine
+app.post('/getpatientappointments', async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        patientId: parseInt(id),
+      },
+      include: {
+        doctor: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    res.json({ appointments });
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
+
   
   // Endpoint to delete a user by email(works fine)
 app.delete('/deleteUser', async (req, res) => {
@@ -212,11 +288,12 @@ app.post('/findPatient', async (req, res) => {
 
 //find all appointments of patient include doctor name 
 app.post('/findAppointment', async (req, res) => {
+  const { patientId } = req.body;
   try {
     const allAppointment = await prisma.appointment.findMany(
       {
         where: {
-          patientId: req.body.patientId
+          patientId: patientId
         },
         include: {
           doctor: {
