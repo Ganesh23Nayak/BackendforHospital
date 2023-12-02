@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
             password: receivedData.signuppassword,
             age: parseInt(receivedData.age),
             sex: receivedData.sex,
-            phone_number:receivedData.phone_number,
+            phone_number:receivedData.phonenumber,
             role: 'PATIENT',
           },
         });
@@ -131,7 +131,7 @@ app.get('/', (req, res) => {
       });
       await prisma.patient.update({
         where: {
-          id: receivedData.patientId,
+          patientId: receivedData.patientId,
         },
         data: {
           health_conditions: receivedData.health_conditions,
