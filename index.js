@@ -11,6 +11,35 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+async function createDefaultUser() {
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'admin@gmail.com' },
+    });
+
+    if (!existingUser) {
+      const defaultUser = await prisma.user.create({
+        data: {
+          name: 'admin',
+          email: 'admin@gmail.com',
+          password:'123',
+          role:'ADMINISTRATOR'
+        },
+      });
+
+      console.log('Default user created:', defaultUser);
+    } else {
+      console.log('Default user already exists.');
+    }
+  } catch (error) {
+    console.error('Error creating default user:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+createDefaultUser();
+
 
 // works fine add user  
   app.post('/addUser', async (req, res) => {
