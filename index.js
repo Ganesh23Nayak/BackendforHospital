@@ -6,6 +6,7 @@ const prisma = new PrismaClient()
 const port = 3000
 app.use(express.json());
 app.use(cors());
+require('dotenv').config();
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
